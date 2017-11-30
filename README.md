@@ -9,17 +9,17 @@ lshw -class network
 ```
 只有网卡硬件id为 `0bda:b720`的机器才能用此驱动
 
-目前支持的机型ezpad 6 plus (更新中...)
+目前支持的机型: ezpad 6 plus (更新中...)
 
 使用如下步骤进行操作：
-- 1 下载当前驱动，解压后，搞到平板上
-- 2 cd到驱动所在目录 
-- 3 使用如下命令进行安装
+- 1:下载当前驱动，解压后，搞到平板上
+- 2:cd到驱动所在目录 
+- 3:使用如下命令进行安装
 ```
-sudo make  -j4   # 编译
-sudo make install  # 安装
-sudo modprobe -v 8723bu  # 加载驱动，运行该行命令后，无线网卡就能工作了
-sudo lsmod | grep 8723bu  # 如果有输出显示，证明无线网卡驱动加载成功
+sudo make  -j4            #编译
+sudo make install         #安装
+sudo modprobe -v 8723bu   #加载驱动，运行该行命令后，无线网卡就能工作了
+sudo lsmod | grep 8723bu  #如果有输出显示，证明无线网卡驱动加载成功
 ```
 
 
