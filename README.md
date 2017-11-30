@@ -1,6 +1,12 @@
 # for Chinese user who is not good at English
 # 为英文不好的中国同胞准备的
 ## 首先查看自己网卡的id
+使用如下命令找到自己网卡的id
+```
+lsusb
+lspci
+lshw -class network
+```
 
 # rtl8723bu
 Driver for Realtek RTL8723BU Wireless Adapter with Hardware ID `0bda:b720`
