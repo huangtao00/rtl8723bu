@@ -353,7 +353,11 @@ static int rtw_ieee80211_channel_to_frequency(int chan, int band)
 
 static u64 rtw_get_systime_us(void)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0))
+	ktime_t ts;
+	ts = ktime_get_boottime();
+	return do_div(ts, 1000);	
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 39))
 	struct timespec ts;
 	get_monotonic_boottime(&ts);
 	return ((u64)ts.tv_sec*1000000) + ts.tv_nsec / 1000;
@@ -839,6 +843,9 @@ void rtw_cfg80211_indicate_disconnect(_adapter *padapter)
 #else
 			cfg80211_disconnected(padapter->pnetdev, 0, NULL, 0, GFP_ATOMIC);
 #endif
+		else
+			cfg80211_connect_result(padapter->pnetdev, NULL, NULL, 0, NULL, 0,
+						WLAN_STATUS_UNSPECIFIED_FAILURE, GFP_ATOMIC);
 #endif // kernel >= 3.11
 	}
 }
@@ -1734,7 +1741,7 @@ static int cfg80211_rtw_change_iface(struct wiphy *wiphy,
 	}
 
 #ifdef CONFIG_CONCURRENT_MODE
-	if(padapter->adapter_type == SECONDARY_ADAPTER)
+	if(padapter->adapter_type == SECONDARYadapter)
 	{
 		DBG_871X(FUNC_NDEV_FMT" call netdev_if2_open\n", FUNC_NDEV_ARG(ndev));
 		if(netdev_if2_open(ndev) != 0) {
@@ -1743,7 +1750,7 @@ static int cfg80211_rtw_change_iface(struct wiphy *wiphy,
 			goto exit;
 		}
 	}
-	else if(padapter->adapter_type == PRIMARY_ADAPTER)
+	else if(padapter->adapter_type == PRIMARYadapter)
 #endif //CONFIG_CONCURRENT_MODE
 	{
 		DBG_871X(FUNC_NDEV_FMT" call netdev_open\n", FUNC_NDEV_ARG(ndev));
@@ -1811,6 +1818,7 @@ static int cfg80211_rtw_change_iface(struct wiphy *wiphy,
 		#endif //CONFIG_P2P
 		break;
 	default:
+		pr_info("%s - type %d\n", __func__, type);
 		ret = -EOPNOTSUPP;
 		goto exit;
 	}
@@ -3042,6 +3050,7 @@ static int cfg80211_rtw_connect(struct wiphy *wiphy, struct net_device *ndev,
 
 		if(rtw_set_802_11_add_wep(padapter, pwep) == (u8)_FAIL)
 		{
+			pr_info("%s - rtw_set_802_11_add_wep() failed\n", __func__);
 			ret = -EOPNOTSUPP ;
 		}
 
